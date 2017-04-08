@@ -57,6 +57,14 @@ public class Solver {
         }
     }
 
+    private char[][] copyBoard(char[][] boardToCopy){
+        char[][] copy = new char[boardToCopy.length][];
+        for (int i = 0; i < boardToCopy.length; ++i) {
+            copy[i] = Arrays.copyOf(boardToCopy[i], boardToCopy[i].length);
+        }
+        return copy;
+    }
+
     private boolean placePiece(char[][] board, int[] coord, int[][] orient){
         if (coord == null || board == null || orient == null)
             return false;
