@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Scanner;
 
@@ -36,81 +37,73 @@ public class Solver {
 
     private void solveBoard(char[][] board, ArrayList<Character> pieces){
         int[] coord = getUpperLeftCoord(board);
+
         if (coord == null) {
             printBoard(board);
             return;
         }
 
-        for(char pc : pieces) {
+        if(pieces.isEmpty())
+            return;
+
+        for (char pc : pieces) {
             ArrayList<int[][]> pieceOrs = pieceHashMap.get(pc).getOrientations();
             for (int[][] orient : pieceOrs) {
-                int offset = getOffset(orient[0]);
-                if ((coord[1] - offset) < 0)
-                    return;
-                coord[1] -= offset;
-                int[] shape = {orient.length, orient[0].length};
-
-                for (int i = 0; i < shape[0]; ++i) {
-                    for (int j = 0; j < shape[1]; ++j) {
-                        if (board[coord[0] + i][coord[1] + j] != '\u0000' && orient[i][j] != 0) {
-                            break;
-                        }
-                    }
+                if (!placePiece(board, Arrays.copyOf(coord, coord.length), orient)) {
+                    continue;
                 }
-
-                for (int i = 0; i < shape[0]; ++i) {
-                    for (int j = 0; j < shape[1]; ++j) {
-                        if (board[coord[0] + i][coord[1] + j] == '\u0000') {
-                            board[coord[0] + i][coord[1] + j] = 'a';
-                        }
-                    }
-                }
+                solveBoard(board, pieces);
             }
-            return;
         }
     }
 
-    private boolean placePiece(char[][] board, char pc){
-        int[] coord = getUpperLeftCoord(board);
-        if(coord == null)
+    private boolean placePiece(char[][] board, int[] coord, int[][] orient){
+        if (coord == null || board == null || orient == null)
             return false;
-        ArrayList<int[][]> pieceOrs = pieceHashMap.get(pc).getOrientations();
-        for(int[][] orient : pieceOrs){
-            int offset = getOffset(orient[0]);
-            if((coord[1] - offset) < 0)
-                return false;
-            coord[1] -= offset;
-            int[] shape = {orient.length, orient[0].length};
 
-            for(int i = 0; i < shape[0]; ++i){
-                for(int j = 0; j < shape[1]; ++j){
-                    if(board[coord[0]+i][coord[1]+j] != '\u0000' && orient[i][j] != 0){
-                        break;
-                    }
-                }
-            }
+        int offset = getOffset(orient[0]);
+        int[] shape = {orient.length, orient[0].length};
 
-            for(int i = 0; i < shape[0]; ++i){
-                for(int j = 0; j < shape[1]; ++j){
-                    if(board[coord[0]+i][coord[1]+j] == '\u0000'){
-                        board[coord[0]+i][coord[1]+j] = 'a';
-                    }
+        if ((coord[1] - offset) < 0 ||
+                coord[1] + shape[1] > board[0].length ||
+                coord.length-1 + shape[0] > coord.length)
+            return false;
+
+        coord[1] -= offset;
+
+        boolean canBePlaced = true;
+        for (int i = 0; i < shape[0]; ++i) {
+            for (int j = 0; j < shape[1]; ++j) {
+                if (board[coord[0]+i][coord[1]+j] != '\u0000' && orient[i][j] != 0) {
+                    canBePlaced = false;
                 }
             }
         }
-        return false;
+
+        if (!canBePlaced)
+            return false;
+
+        for (int i = 0; i < shape[0]; ++i) {
+            for (int j = 0; j < shape[1]; ++j) {
+                if (board[coord[0] + i][coord[1] + j] == '\u0000') {
+                    board[coord[0] + i][coord[1] + j] = 'a';
+                }
+            }
+        }
+
+        return true;
     }
 
     private int getOffset(int[] arr){
-        for(int i = 0; i < arr.length; ++i){
-            if(arr[i] != 0)
+        for (int i = 0; i < arr.length; ++i) {
+            if (arr[i] != 0)
                 return i;
         }
         return -1;
     }
 
     private void printBoard(char[][] board){
-        for(char[] row : board) {
+        for (char[] row : board) {
             for (char ch : row)
                 System.out.print(ch);
             System.out.print('\n');
@@ -118,8 +111,8 @@ public class Solver {
     }
 
     private int[] getUpperLeftCoord(char[][] board){
-        for(int i = 0; i < board.length; ++i)
-            for(int j = 0; j < board[i].length; ++j)
+        for (int i = 0; i < board.length; ++i)
+            for (int j = 0; j < board[i].length; ++j)
                 if(board[i][j] == '0')
                     return new int[] {i, j};
         return null;
