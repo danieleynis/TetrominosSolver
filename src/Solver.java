@@ -35,26 +35,31 @@ public class Solver {
         solveBoard(board, pieces);
     }
 
-    private void solveBoard(char[][] board, ArrayList<Character> pieces){
+    private boolean solveBoard(char[][] board, ArrayList<Character> pieces){
         int[] coord = getUpperLeftCoord(board);
 
         if (coord == null) {
             printBoard(board);
-            return;
+            return true;
         }
 
         if(pieces.isEmpty())
-            return;
+            return false;
 
         for (char pc : pieces) {
             ArrayList<int[][]> pieceOrs = pieceHashMap.get(pc).getOrientations();
+            pieces.remove(pc);
             for (int[][] orient : pieceOrs) {
                 if (!placePiece(board, Arrays.copyOf(coord, coord.length), orient)) {
                     continue;
                 }
-                solveBoard(board, pieces);
+                boolean result = solveBoard(copyBoard(board), pieces);
+                if (result)
+                    return result;
             }
+            pieces.add(pc);
         }
+        return false;
     }
 
     private char[][] copyBoard(char[][] boardToCopy){
