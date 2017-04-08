@@ -1,0 +1,127 @@
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Scanner;
+
+public class Solver {
+    private int rows;
+    private int cols;
+    private ArrayList<Character> pieces = new ArrayList<>();
+    private HashMap<Character, Piece> pieceHashMap = new HashMap<>();
+    private char[][] board;
+
+    Solver(){
+        Scanner input = new Scanner(System.in);
+        rows = input.nextInt();
+        cols = input.nextInt();
+        String pcs = input.next();
+
+        //http://stackoverflow.com/questions/15331637/convert-string-to-arraylist-character-in-java
+        for(char piece : pcs.toCharArray())
+            pieces.add(piece);
+
+        board = new char[rows][cols];
+
+        pieceHashMap.put('I', new PieceI());
+        pieceHashMap.put('5', new Piece5());
+        pieceHashMap.put('2', new Piece2());
+        pieceHashMap.put('T', new PieceT());
+        pieceHashMap.put('L', new PieceL());
+        pieceHashMap.put('O', new Piece0());
+        pieceHashMap.put('P', new PieceP());
+    }
+
+    public void solveBoard(){
+        solveBoard(board, pieces);
+    }
+
+    private void solveBoard(char[][] board, ArrayList<Character> pieces){
+        int[] coord = getUpperLeftCoord(board);
+        if (coord == null) {
+            printBoard(board);
+            return;
+        }
+
+        for(char pc : pieces) {
+            ArrayList<int[][]> pieceOrs = pieceHashMap.get(pc).getOrientations();
+            for (int[][] orient : pieceOrs) {
+                int offset = getOffset(orient[0]);
+                if ((coord[1] - offset) < 0)
+                    return;
+                coord[1] -= offset;
+                int[] shape = {orient.length, orient[0].length};
+
+                for (int i = 0; i < shape[0]; ++i) {
+                    for (int j = 0; j < shape[1]; ++j) {
+                        if (board[coord[0] + i][coord[1] + j] != '\u0000' && orient[i][j] != 0) {
+                            break;
+                        }
+                    }
+                }
+
+                for (int i = 0; i < shape[0]; ++i) {
+                    for (int j = 0; j < shape[1]; ++j) {
+                        if (board[coord[0] + i][coord[1] + j] == '\u0000') {
+                            board[coord[0] + i][coord[1] + j] = 'a';
+                        }
+                    }
+                }
+            }
+            return;
+        }
+    }
+
+    private boolean placePiece(char[][] board, char pc){
+        int[] coord = getUpperLeftCoord(board);
+        if(coord == null)
+            return false;
+        ArrayList<int[][]> pieceOrs = pieceHashMap.get(pc).getOrientations();
+        for(int[][] orient : pieceOrs){
+            int offset = getOffset(orient[0]);
+            if((coord[1] - offset) < 0)
+                return false;
+            coord[1] -= offset;
+            int[] shape = {orient.length, orient[0].length};
+
+            for(int i = 0; i < shape[0]; ++i){
+                for(int j = 0; j < shape[1]; ++j){
+                    if(board[coord[0]+i][coord[1]+j] != '\u0000' && orient[i][j] != 0){
+                        break;
+                    }
+                }
+            }
+
+            for(int i = 0; i < shape[0]; ++i){
+                for(int j = 0; j < shape[1]; ++j){
+                    if(board[coord[0]+i][coord[1]+j] == '\u0000'){
+                        board[coord[0]+i][coord[1]+j] = 'a';
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    private int getOffset(int[] arr){
+        for(int i = 0; i < arr.length; ++i){
+            if(arr[i] != 0)
+                return i;
+        }
+        return -1;
+    }
+
+    private void printBoard(char[][] board){
+        for(char[] row : board) {
+            for (char ch : row)
+                System.out.print(ch);
+            System.out.print('\n');
+        }
+    }
+
+    private int[] getUpperLeftCoord(char[][] board){
+        for(int i = 0; i < board.length; ++i)
+            for(int j = 0; j < board[i].length; ++j)
+                if(board[i][j] == '0')
+                    return new int[] {i, j};
+        return null;
+    }
+}
