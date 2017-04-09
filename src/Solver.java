@@ -9,6 +9,7 @@ public class Solver {
     private ArrayList<Character> pieces = new ArrayList<>();
     private HashMap<Character, Piece> pieceHashMap = new HashMap<>();
     private char[][] board;
+    private char pcid = 'a';
 
     Solver(){
         Scanner input = new Scanner(System.in);
@@ -32,7 +33,8 @@ public class Solver {
     }
 
     public void solveBoard(){
-        solveBoard(copyBoard(board), pieces);
+        if(!solveBoard(copyBoard(board), pieces))
+            System.out.println('?');
     }
 
     private boolean solveBoard(char[][] board, ArrayList<Character> pieces){
@@ -43,24 +45,22 @@ public class Solver {
             return true;
         }
 
-        int cur_piece = 0;
-        for (char pc : pieces) {
+        for (int i = 0; i < pieces.size(); ++i) {
+            char pc = pieces.get(i);
             ArrayList<int[][]> pieceOrs = pieceHashMap.get(pc).getOrientations();
-            pieces.remove(cur_piece);
+            pieces.remove(i);
             for (int[][] orient : pieceOrs) {
-                if (!placePiece(board, Arrays.copyOf(coord, coord.length), orient)) {
+                char[][] boardCopy = copyBoard(board);
+                if (!placePiece(boardCopy, Arrays.copyOf(coord, coord.length), orient)) {
                     continue;
                 }
-                boolean result = solveBoard(copyBoard(board), pieces);
+                ++pcid;
+                boolean result = solveBoard(boardCopy, pieces);
                 if (result)
                     return result;
+                --pcid;
             }
-
-            if(pieces.isEmpty())
-                return false;
-
-            pieces.add(cur_piece, pc);
-            ++cur_piece;
+            pieces.add(i, pc);
         }
         return false;
     }
@@ -81,8 +81,8 @@ public class Solver {
         int[] shape = {orient.length, orient[0].length};
 
         if (coord[1] - offset < 0 ||
-                coord[1] + offset > board[0].length ||
-                coord[0] + shape[1] > board.length)
+                coord[1] + (shape[1] - offset) > board[0].length ||
+                coord[0] + shape[0] > board.length)
             return false;
 
         coord[1] -= offset;
@@ -101,8 +101,8 @@ public class Solver {
 
         for (int i = 0; i < shape[0]; ++i) {
             for (int j = 0; j < shape[1]; ++j) {
-                if (board[coord[0] + i][coord[1] + j] == '\u0000') {
-                    board[coord[0] + i][coord[1] + j] = 'a';
+                if (orient[i][j] == 1) {
+                    board[coord[0] + i][coord[1] + j] = pcid;
                 }
             }
         }
