@@ -32,7 +32,7 @@ public class Solver {
     }
 
     public void solveBoard(){
-        solveBoard(board, pieces);
+        solveBoard(copyBoard(board), pieces);
     }
 
     private boolean solveBoard(char[][] board, ArrayList<Character> pieces){
@@ -43,12 +43,10 @@ public class Solver {
             return true;
         }
 
-        if(pieces.isEmpty())
-            return false;
-
+        int cur_piece = 0;
         for (char pc : pieces) {
             ArrayList<int[][]> pieceOrs = pieceHashMap.get(pc).getOrientations();
-            pieces.remove(pc);
+            pieces.remove(cur_piece);
             for (int[][] orient : pieceOrs) {
                 if (!placePiece(board, Arrays.copyOf(coord, coord.length), orient)) {
                     continue;
@@ -57,7 +55,12 @@ public class Solver {
                 if (result)
                     return result;
             }
-            pieces.add(pc);
+
+            if(pieces.isEmpty())
+                return false;
+
+            pieces.add(cur_piece, pc);
+            ++cur_piece;
         }
         return false;
     }
@@ -77,9 +80,9 @@ public class Solver {
         int offset = getOffset(orient[0]);
         int[] shape = {orient.length, orient[0].length};
 
-        if ((coord[1] - offset) < 0 ||
-                coord[1] + shape[1] > board[0].length ||
-                coord.length-1 + shape[0] > coord.length)
+        if (coord[1] - offset < 0 ||
+                coord[1] + offset > board[0].length ||
+                coord[0] + shape[1] > board.length)
             return false;
 
         coord[1] -= offset;
@@ -126,7 +129,7 @@ public class Solver {
     private int[] getUpperLeftCoord(char[][] board){
         for (int i = 0; i < board.length; ++i)
             for (int j = 0; j < board[i].length; ++j)
-                if(board[i][j] == '0')
+                if(board[i][j] == '\u0000')
                     return new int[] {i, j};
         return null;
     }
