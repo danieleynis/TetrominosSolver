@@ -1,3 +1,8 @@
+/*
+Author: Daniel Eynis
+E-mail: eynis@pdx.edu
+ */
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;

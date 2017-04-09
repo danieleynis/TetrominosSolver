@@ -1,3 +1,8 @@
+/*
+Author: Daniel Eynis
+E-mail: eynis@pdx.edu
+ */
+
 public class Piece2 extends Piece{
     Piece2(){
         super();
