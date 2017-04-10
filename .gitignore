@@ -2,3 +2,8 @@
 out
 .idea
 *.class
+*.docx
+*.doc
+*.tmp
+*.pdf
+*.txt
