@@ -1,3 +1,7 @@
 *.iml
 out
 .idea
+*.docx
+*.doc
+*.tmp
+*.pdf

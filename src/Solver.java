@@ -55,14 +55,15 @@ public class Solver {
             ArrayList<int[][]> pieceOrs = pieceHashMap.get(pc).getOrientations();
             pieces.remove(i);
             for (int[][] orient : pieceOrs) {
-                char[][] boardCopy = copyBoard(board);
-                if (!placePiece(boardCopy, Arrays.copyOf(coord, coord.length), orient)) {
+                if (!canBePlaced(board, Arrays.copyOf(coord, coord.length), orient)) {
                     continue;
                 }
+                char[][] boardCopy = copyBoard(board);
+                placePiece(boardCopy, Arrays.copyOf(coord, coord.length), orient);
                 ++pcid;
                 boolean result = solveBoard(boardCopy, pieces);
                 if (result)
-                    return result;
+                    return true;
                 --pcid;
             }
             pieces.add(i, pc);
@@ -78,7 +79,7 @@ public class Solver {
         return copy;
     }
 
-    private boolean placePiece(char[][] board, int[] coord, int[][] orient){
+    private boolean canBePlaced(char[][] board, int[] coord, int[][] orient){
         if (coord == null || board == null || orient == null)
             return false;
 
@@ -92,17 +93,21 @@ public class Solver {
 
         coord[1] -= offset;
 
-        boolean canBePlaced = true;
         for (int i = 0; i < shape[0]; ++i) {
             for (int j = 0; j < shape[1]; ++j) {
                 if (board[coord[0]+i][coord[1]+j] != '\u0000' && orient[i][j] != 0) {
-                    canBePlaced = false;
+                    return false;
                 }
             }
         }
 
-        if (!canBePlaced)
-            return false;
+        return true;
+    }
+
+    private void placePiece(char[][] board, int[] coord, int[][] orient){
+        int offset = getOffset(orient[0]);
+        int[] shape = {orient.length, orient[0].length};
+        coord[1] -= offset;
 
         for (int i = 0; i < shape[0]; ++i) {
             for (int j = 0; j < shape[1]; ++j) {
@@ -111,8 +116,6 @@ public class Solver {
                 }
             }
         }
-
-        return true;
     }
 
     private int getOffset(int[] arr){
